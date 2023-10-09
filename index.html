@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDFgo - File Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    
+</head>
+<body>
+    <header>
+        <h1>PDFgo - Online PDF Converter</h1>
+    </header>
+    <div class="container">
+        <div class="options">
+            <label for="conversionType">Select Conversion Type:</label>
+            <select id="conversionType">
+                <option value="imageToPdf">Image to PDF</option>
+                <option value="pdfToImage">PDF to Image</option>
+            </select>
+            <br>
+            <label for="imagesPerPage">Images Per Page:</label>
+            <select id="imagesPerPage">
+                <option value="1">1 Image per Page</option>
+                <option value="2">2 Images per Page</option>
+                <option value="4">4 Images per Page</option>
+            </select>
+            <br>
+            <label for="paperFormat">Select Paper Format:</label>
+            <select id="paperFormat">
+            <option value="a4">A4 Portrait</option>
+            <option value="a4-landscape">A4 Landscape</option>
+            <option value="a3">A3 Portrait</option>
+            <option value="a3-landscape">A3 Landscape</option>
+            </select>
+            <br>
+            <label for="marginInput">Set Margins (mm):</label>
+            <input type="number" id="marginInput" value="10" min="0">
+            <br>
+            <label for="filename">Enter Filename:</label>
+            <input type="text" id="filename" placeholder="converted.pdf">
+            <br>
+            <button id="convert">Convert</button>
+        </div>
+        <div class="file-container">
+            <input type="file" id="upload" multiple>
+            <button id="addFiles">Add Files</button>
+        </div>
+    </div>
+    <div id="fileList" class="container">
+        <h2>Selected Files:</h2>
+        <div id="filePreviews" class="file-previews"></div>
+        <ul id="sortable" class="sortable-files"></ul>
+    </div>
+    <!-- Add this code to the end of your HTML document -->
+<div id="feedbackForm" class="container">
+    <h2>Feedback</h2>
+    <form id="feedbackForm">
+        <label for="satisfaction">1. Are you satisfied with the current conversions?</label><br>
+        <input type="text" id="satisfaction" name="satisfaction" placeholder="Your one-line response"><br><br>
+
+        <label for="suggestions">2. Any suggestions for future upgrades?</label><br>
+        <textarea id="suggestions" name="suggestions" rows="5" placeholder="Your feedback (up to 400 words)"></textarea><br><br>
+
+        <button id="submitFeedback">Submit</button>
+    </form>
+</div>
+<div id="progress-bar" class="progress-bar">
+    <div id="progress" class="progress"></div>
+</div>
+
+    <script>
+        var files = [];
+        var conversionType = "imageToPdf"; // Default conversion type
+        $(function() {
+            $(".sortable-files").sortable();
+        });
+        // Handle conversion type change
+        document.getElementById('conversionType').addEventListener('change', function() {
+            conversionType = this.value;
+            updateFileList();
+        });
+        document.getElementById('addFiles').addEventListener('click', function() {
+            var input = document.getElementById('upload');
+            var selectedFiles = input.files;
+            Array.from(selectedFiles).forEach(function(file, i) {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    files.push({ data: reader.result, file: file });
+                    updateFileList();
+                }
+                reader.readAsDataURL(file);
+            });
+        });
+        document.getElementById('convert').addEventListener('click', function() {
+            if (conversionType === "imageToPdf") {
+                // Convert images to PDF
+                convertImagesToPdf();
+            } else if (conversionType === "pdfToImage") {
+                // Convert PDF to images
+                convertPdfToImages();
+            }
+        });
+        function updateFileList() {
+            var sortableList = document.getElementById('sortable');
+            var filePreviews = document.getElementById('filePreviews');
+            sortableList.innerHTML = '';
+            filePreviews.innerHTML = ''; // Clear previous file previews 
+            files.forEach(function(file, i) {
+                var listItem = document.createElement('li');
+                listItem.className = 'sortable-item'; // Add a class for sortable items
+                listItem.innerHTML = `
+                    <span class="file-filename">${file.file.name}</span>
+                    <button class="delete-button">Delete</button>
+                `;
+                // Add click event for delete button
+                listItem.querySelector('.delete-button').addEventListener('click', function() {
+                    files.splice(i, 1);
+                    updateFileList();
+                });
+                sortableList.appendChild(listItem);
+                // Display file previews (if image)
+                if (file.file.type.match('image.*')) {
+                    var filePreview = document.createElement('img');
+                    filePreview.src = file.data;
+                    filePreview.className = 'file-preview';
+                    filePreviews.appendChild(filePreview);
+                }
+            });
+        }
+        function convertImagesToPdf() {
+    var doc;
+    var selectedFormat = document.getElementById('paperFormat').value;
+    var margin = parseInt(document.getElementById('marginInput').value);
+    var filename = document.getElementById('filename').value || 'converted.pdf'; // Default filename is 'converted.pdf'
+    var imagesPerPage = parseInt(document.getElementById('imagesPerPage').value); // Number of images per page
+    if (selectedFormat === 'a4') {
+        doc = new jsPDF();
+    } else if (selectedFormat === 'a4-landscape') {
+        doc = new jsPDF('landscape', 'mm', 'a4');
+    } else if (selectedFormat === 'a3') {
+        doc = new jsPDF('portrait', 'mm', 'a3');
+    } else if (selectedFormat === 'a3-landscape') {
+        doc = new jsPDF('landscape', 'mm', 'a3');
+    }
+    var imagesAdded = 0;
+    var pageWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+    var pageHeight = doc.internal.pageSize.getHeight() - 2 * margin;
+    files.forEach(function (file, i) {
+        if (file.file.type.match('image.*')) {
+            // Calculate image dimensions based on the paper format, margins, and number of images
+            var imageWidth, imageHeight;
+            if (imagesPerPage === 1) {
+                // Single image per page, fill the page
+                imageWidth = pageWidth;
+                imageHeight = pageHeight;
+            } else if (imagesPerPage === 2) {
+                // Two images per page, arrange them side by side
+                imageWidth = pageWidth / 2;
+                imageHeight = pageHeight;
+            } else if (imagesPerPage === 4) {
+                // Four images per page, arrange them in a 2x2 grid
+                imageWidth = pageWidth / 2;
+                imageHeight = pageHeight / 2;
+            }
+            var x, y;
+            if (imagesPerPage === 1) {
+                x = margin;
+                y = margin;
+            } else if (imagesPerPage === 2) {
+                x = margin + (imagesAdded % 2) * imageWidth;
+                y = margin + Math.floor(imagesAdded / 2) * imageHeight;
+            } else if (imagesPerPage === 4) {
+                x = margin + (imagesAdded % 2) * imageWidth;
+                y = margin + Math.floor(imagesAdded / 2) * imageHeight;
+            }
+            doc.addImage(
+                file.data,
+                'JPEG',
+                x,
+                y,
+                imageWidth,
+                imageHeight
+            );
+            imagesAdded++;
+            if (imagesAdded % imagesPerPage === 0 && i !== files.length - 1) {
+                doc.addPage();
+            }
+            var progress = ((i + 1) / files.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+    });
+    doc.save(filename); // Save the PDF after all images are added.
+    // Add this JavaScript code to handle the feedback form submission
+document.getElementById('submitFeedback').addEventListener('click', function (e) {
+    e.preventDefault();
+
+    var satisfaction = document.getElementById('satisfaction').value;
+    var suggestions = document.getElementById('suggestions').value;
+
+    // You can store the feedback in local storage or send it to a server for processing
+    // For now, we'll just display the feedback in an alert
+    alert("Thank you for your feedback!\n\n1. Satisfaction: " + satisfaction + "\n2. Suggestions: " + suggestions);
+
+    // Clear the form fields after submission (optional)
+    document.getElementById('satisfaction').value = '';
+    document.getElementById('suggestions').value = '';
+});
+}
+    </script>
+</body>
+<footer align="center">
+    &copy; 2023 Vamsi
+</footer>
+</html>

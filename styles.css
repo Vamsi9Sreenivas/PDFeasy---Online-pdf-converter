@@ -1,0 +1,108 @@
+/* Reset default margin and padding for all elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+/* Apply background image */
+body {
+    font-family: Helvetica, sans-serif;
+    background-image: url('https://wallpaperaccess.com/full/1658089.jpg'); /* Add your background image URL here */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+/* Header styles */
+header {
+    background-color: rgba(17, 17, 17, 0.9); /* Adjust background color */
+    color: #ffdb58; /* Text color (changed to yellow) */
+    text-align: left;
+    padding: 15px;
+}
+/* Container styles */
+.container {
+    margin: 20px; /* Adjust margin as needed */
+    text-align: left;
+}
+/* Button styles */
+button {
+    padding: 10px 20px;
+    background-color: #b7283b; /* Button background color */
+    color: #fff; /* Button text color */
+    border: none;
+    cursor: pointer;
+    margin: 5px;
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+button:hover {
+    background-color: #0056b3; /* Darker color on hover */
+}
+/* Link styles */
+a {
+    color: #ffdb58; /* Link color (changed to yellow) */
+    text-decoration: none; /* Remove underlines */
+    transition: color 0.3s ease; /* Smooth color change on hover */
+}
+a:hover {
+    color: #ffa500; /* Darker color on hover (changed to orange) */
+}
+/* Number input styles */
+input[type="number"] {
+    width: 50px; /* Adjust width as needed */
+}
+/* Image list container */
+.image-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative; /* Needed for positioning the delete button */
+}
+/* Image display styles */
+.image-list img {
+    max-width: 100px; /* Adjust the maximum width for small format */
+    max-height: 100px; /* Adjust the maximum height for small format */
+    position: relative; /* Needed for positioning the delete button */
+}
+/* Delete button styles */
+.delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 3px;
+    cursor: pointer;
+}
+/* List item styles */
+li {
+    background-color: #dec2c7;
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    cursor: grab;
+    position: relative;
+    min-width: 100px;
+}
+li:hover {
+    background-color: #f0f0f0;
+}
+/* Progress bar styles */
+.progress-bar {
+    width: 100%;
+    background-color: #f0f0f0;
+    height: 20px;
+    margin-top: 20px;
+}
+
+/* Progress indicator styles */
+.progress {
+    width: 0;
+    height: 100%;
+    background-color: #007bff; /* Change color to our preferece, and it Indicates conversion, once the bar turns completely blue,it indicates that the process is complete. */
+    transition: width 0.3s ease-in-out;
+}
+/* Note this project can be extended to other file formats and can be enhanced in better way.
+/* Add any additional CSS styles and customizations as needed */
